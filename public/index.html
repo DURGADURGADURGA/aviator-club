@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0b0d18">
+<title>Aviator Club</title>
+<style>
+  :root{--bg:#0b0d18;--card:#141829;--card2:#1a1f35;--line:#252b47;--txt:#eef0fa;--mut:#8890b5;--acc:#e5173f;--ok:#27d17c;--gold:#ffc83d;--blue:#4b7bff}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:radial-gradient(900px 400px at 50% -100px,#1b2250,transparent),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:12px 12px 40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  input,button,select{font:inherit;border-radius:12px;border:1px solid var(--line);padding:12px;background:#0d1020;color:var(--txt);outline:none}
+  input:focus{border-color:var(--blue)}
+  input{width:100%}
+  button{cursor:pointer;background:var(--acc);border:0;font-weight:700;color:#fff;transition:transform .08s,opacity .2s}
+  button:active{transform:scale(.97)}
+  button.alt{background:#262c4a}
+  button.ok{background:var(--ok);color:#06210f}
+  button.gold{background:var(--gold);color:#2b2000}
+  button.sm{padding:7px 12px;font-size:13px;border-radius:9px}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  .row{display:flex;gap:8px;margin-top:8px}.row>*{flex:1}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px}
+  .brand b{color:var(--acc)}
+  .top{display:flex;justify-content:space-between;align-items:center;margin:4px 0 12px}
+  .wallet{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);padding:6px 6px 6px 14px;border-radius:99px}
+  .dia{color:var(--gold);font-weight:800}
+  .plus{width:30px;height:30px;border-radius:50%;padding:0;font-size:18px;background:var(--gold);color:#2b2000}
+  .hist{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}
+  .hist span{padding:4px 10px;border-radius:99px;background:#1c2140;font-size:13px;font-weight:700;white-space:nowrap}
+  .hist .hi{color:var(--ok)}.hist .mid{color:var(--blue)}.hist .lo{color:#ff6b86}
+  .stage{height:240px;border-radius:18px;background:linear-gradient(#10152e,#090b17);position:relative;overflow:hidden;border:1px solid var(--line)}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .mult{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:58px;font-weight:900;letter-spacing:-1px;text-shadow:0 4px 30px rgba(0,0,0,.6);pointer-events:none}
+  .mult.crash{color:var(--acc)}
+  .sub{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:var(--mut);font-size:14px}
+  .bar{position:absolute;top:0;left:0;height:4px;background:var(--acc);transition:width .1s linear}
+  label{font-size:12px;color:var(--mut);display:block;margin:6px 0 2px}
+  .quick{display:flex;gap:6px;margin-top:8px}.quick button{flex:1;padding:8px;background:#262c4a;font-size:13px}
+  .list div.r{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;gap:8px}
+  .list div.r:last-child{border:0}
+  .win{color:var(--ok);font-weight:700}.lose{color:var(--mut)}
+  h3{margin:0 0 8px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1;background:#1a1f35}.tabs button.on{background:var(--acc)}
+  .err{color:#ff6b86;font-size:14px;min-height:18px;margin-top:6px}
+  .hidden{display:none!important}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:24px}.stat span{font-size:12px;color:var(--mut)}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#444b6e;margin-right:6px}.dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .badge{font-size:11px;background:var(--blue);padding:2px 7px;border-radius:99px;margin-left:6px}
+  .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#202750;border:1px solid var(--blue);padding:12px 18px;border-radius:12px;z-index:9;max-width:90%;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .foot{text-align:center;color:#59608a;font-size:12px;margin-top:18px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;z-index:8}
+  .modal .card{width:100%;max-width:560px;margin:0;border-radius:20px 20px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="auth">
+    <div class="brand" style="justify-content:center;margin:30px 0 16px;font-size:30px">✈️ Aviator <b>Club</b></div>
+    <div class="card">
+      <label>Naam</label><input id="n" placeholder="apna naam (letters/numbers)" autocomplete="username">
+      <label>Password</label><input id="p" type="password" placeholder="password" autocomplete="current-password">
+      <div class="row"><button onclick="auth('login')">Login</button><button class="alt" onclick="auth('signup')">Sign up</button></div>
+      <div class="err" id="aerr"></div>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="top">
+      <div class="brand">✈️ Aviator <b>Club</b></div>
+      <div class="wallet"><span class="dia">💎 <span id="dia">0</span></span><button class="plus" onclick="openReq()">+</button></div>
+    </div>
+    <div style="margin:-6px 0 10px;color:var(--mut);font-size:14px">Namaste, <b id="who" style="color:var(--txt)"></b></div>
+
+    <div class="tabs hidden" id="tabs">
+      <button class="on" id="tg" onclick="tab('game')">🎮 Game</button>
+      <button id="ta" onclick="tab('admin')">🛠 Admin <span class="badge hidden" id="rb">0</span></button>
+    </div>
+
+    <div id="game">
+      <div class="hist" id="hist"></div>
+      <div class="stage">
+        <div class="bar" id="bar"></div>
+        <canvas id="cv"></canvas>
+        <div class="mult" id="mult">1.00x</div>
+        <div class="sub" id="sub"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <label>Bet amount (💎)</label>
+        <input id="amt" type="number" min="1" value="100" inputmode="numeric">
+        <div class="quick">
+          <button onclick="q(50)">50</button><button onclick="q(100)">100</button><button onclick="q(500)">500</button><button onclick="qh()">½</button><button onclick="qm()">Max</button>
+        </div>
+        <label>Auto cash-out (optional)</label>
+        <input id="auto" type="number" step="0.1" min="1.1" placeholder="jaise 2.0x" inputmode="decimal">
+        <div class="row">
+          <button id="betBtn" class="ok" onclick="bet()">Bet lagao</button>
+          <button id="coBtn" class="gold" onclick="cash()" disabled>Cash Out</button>
+        </div>
+        <div class="err" id="gerr"></div>
+      </div>
+
+      <div class="card list"><h3>Is round ke players</h3><div id="bets"></div></div>
+    </div>
+
+    <div id="admin" class="hidden">
+      <div class="stats">
+        <div class="stat"><b id="s_on">0</b><span>Online</span></div>
+        <div class="stat"><b id="s_pl">0</b><span>Round me</span></div>
+        <div class="stat"><b id="s_pool">0</b><span>💎 Bet pool</span></div>
+      </div>
+
+      <div class="card list"><h3>Diamond requests</h3><div id="reqs"></div></div>
+
+      <div class="card">
+        <h3>Seedha diamonds do / kam karo</h3>
+        <input id="au" placeholder="User ka naam (neeche list se tap karein)">
+        <div class="row"><input id="aa" type="number" placeholder="Diamonds (minus bhi chalega)"><button class="gold" onclick="addD()">Do</button></div>
+      </div>
+
+      <div class="card">
+        <h3>Agla crash point</h3>
+        <div class="row"><input id="nc" type="number" step="0.01" min="1" placeholder="jaise 1.50"><button onclick="setNext()">Set</button><button class="alt" onclick="clearNext()">Random</button></div>
+        <div style="color:var(--mut);font-size:13px;margin-top:8px">Abhi: <b id="ncv" style="color:var(--txt)">random</b></div>
+      </div>
+
+      <div class="card list"><h3>Sabhi players</h3><div id="users"></div></div>
+    </div>
+
+    <div class="foot">Sirf dosto ka time-pass. Diamonds game ke hain, asli paisa nahi.</div>
+  </div>
+</div>
+
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeReq()">
+  <div class="card">
+    <h3>💎 Diamonds maango</h3>
+    <p style="margin:0 0 8px;color:var(--mut);font-size:14px">Kitne diamonds chahiye? Admin approve karega to wallet me aa jayenge.</p>
+    <input id="rq" type="number" min="1" value="1000" inputmode="numeric">
+    <div class="quick"><button onclick="rqv(500)">500</button><button onclick="rqv(1000)">1000</button><button onclick="rqv(5000)">5000</button></div>
+    <div class="row"><button class="alt" onclick="closeReq()">Band karo</button><button class="gold" onclick="sendReq()">Request bhejo</button></div>
+  </div>
+</div>
+
+<script>
+let ws, me = null, state = null, adm = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const send = o => ws && ws.readyState === 1 && ws.send(JSON.stringify(o));
+
+function connect() {
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  ws.onopen = () => { const s = JSON.parse(localStorage.getItem('cred') || 'null'); if (s) send({ type: 'login', ...s }); };
+  ws.onmessage = e => handle(JSON.parse(e.data));
+  ws.onclose = () => setTimeout(connect, 1500);
+}
+
+function auth(type) {
+  const name = $('n').value, pass = $('p').value;
+  localStorage.setItem('cred', JSON.stringify({ name, pass }));
+  send({ type, name, pass });
+}
+
+function toast(t) {
+  const d = document.createElement('div'); d.className = 'toast'; d.textContent = t;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3500);
+}
+
+function handle(m) {
+  if (m.type === 'error') {
+    $('aerr').textContent = m.message; $('gerr').textContent = m.message;
+    if (!me) localStorage.removeItem('cred'); else toast(m.message);
+    return;
+  }
+  if (m.type === 'notice') return toast(m.message);
+  if (m.type === 'me') {
+    me = m;
+    $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+    $('who').textContent = m.user + (m.admin ? ' (admin)' : '');
+    $('dia').textContent = m.diamonds.toLocaleString();
+    $('tabs').classList.toggle('hidden', !m.admin);
+    $('gerr').textContent = '';
+    if (state) render();
+  }
+  if (m.type === 'state') { state = m; render(); }
+  if (m.type === 'admin') { adm = m; renderAdmin(); }
+}
+
+/* ---------- game screen ---------- */
+const cv = $('cv'), cx = cv.getContext('2d');
+function draw(s) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (cv.width !== r.width * dpr) { cv.width = r.width * dpr; cv.height = r.height * dpr; }
+  const w = r.width, h = r.height;
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, w, h);
+  const crashed = s.phase === 'crashed', m = Math.max(s.mult, 1);
+  const L = Math.log(m), top = Math.log(Math.max(m, 2));
+  const xe = 24 + (w - 90) * (s.phase === 'betting' ? 0 : Math.min(1, 0.3 + 0.7 * L / Math.log(10)));
+  const pts = [];
+  for (let i = 0; i <= 40; i++) {
+    const f = i / 40, mi = Math.exp(L * f);
+    pts.push([24 + (xe - 24) * f, h - 28 - (Math.log(mi) / top) * (h - 90)]);
+  }
+  if (s.phase !== 'betting') {
+    const col = crashed ? '#e5173f' : '#ff3b5c';
+    const g = cx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, col + '66'); g.addColorStop(1, col + '05');
+    cx.beginPath(); cx.moveTo(pts[0][0], h); pts.forEach(p => cx.lineTo(p[0], p[1])); cx.lineTo(pts[40][0], h); cx.closePath(); cx.fillStyle = g; cx.fill();
+    cx.beginPath(); pts.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1])); cx.strokeStyle = col; cx.lineWidth = 4; cx.lineCap = 'round'; cx.stroke();
+  }
+  const e = s.phase === 'betting' ? [24, h - 28] : pts[40];
+  cx.font = '34px serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.fillText(crashed ? '💥' : '✈️', Math.min(e[0] + 10, w - 24), Math.max(e[1] - 6, 24));
+}
+
+function render() {
+  const s = state;
+  $('hist').innerHTML = s.history.map(h => `<span class="${h >= 10 ? 'hi' : h >= 2 ? 'mid' : 'lo'}">${h.toFixed(2)}x</span>`).join('');
+  const mu = $('mult');
+  mu.textContent = s.phase === 'betting' ? Math.ceil(s.countdown / 1000) + 's' : s.mult.toFixed(2) + 'x';
+  mu.className = 'mult' + (s.phase === 'crashed' ? ' crash' : '');
+  $('bar').style.width = s.phase === 'betting' ? (100 - s.countdown / 80) + '%' : '0%';
+  $('sub').textContent = { betting: 'Bet lagane ka time', flying: 'Plane ud raha hai...', crashed: 'Plane crash! 💥 ' + s.mult.toFixed(2) + 'x', waiting: 'Round shuru ho raha hai' }[s.phase];
+  draw(s);
+
+  const mine = me && s.bets.find(b => b.user === me.user);
+  $('betBtn').disabled = s.phase !== 'betting' || !!mine;
+  $('betBtn').textContent = mine && s.phase === 'betting' ? 'Bet lag gayi ✓' : 'Bet lagao';
+  const canCash = s.phase === 'flying' && mine && !mine.cashed;
+  $('coBtn').disabled = !canCash;
+  $('coBtn').textContent = canCash ? 'Cash Out 💎' + Math.floor(mine.amount * s.mult) : 'Cash Out';
+
+  $('bets').innerHTML = s.bets.length ? s.bets.map(b => {
+    let r = b.cashed ? `<span class="win">${b.cashed.toFixed(2)}x · +${b.win}</span>` : s.phase === 'crashed' ? '<span class="lose">haar gaya</span>' : '<span>udd raha hai</span>';
+    return `<div class="r"><span>${esc(b.user)} · 💎${b.amount}</span>${r}</div>`;
+  }).join('') : '<div class="r"><span style="color:var(--mut)">Abhi koi bet nahi</span></div>';
+}
+
+const bal = () => me ? me.diamonds : 0;
+function q(v) { $('amt').value = v; }
+function qh() { $('amt').value = Math.max(1, Math.floor(Number($('amt').value) / 2)); }
+function qm() { $('amt').value = bal(); }
+function bet() { $('gerr').textContent = ''; send({ type: 'bet', amount: $('amt').value, auto: $('auto').value }); }
+function cash() { send({ type: 'cashout' }); }
+
+function openReq() { $('modal').classList.remove('hidden'); }
+function closeReq() { $('modal').classList.add('hidden'); }
+function rqv(v) { $('rq').value = v; }
+function sendReq() { send({ type: 'req_diamonds', amount: $('rq').value }); closeReq(); }
+
+/* ---------- admin ---------- */
+function tab(t) {
+  $('game').classList.toggle('hidden', t !== 'game');
+  $('admin').classList.toggle('hidden', t !== 'admin');
+  $('tg').classList.toggle('on', t === 'game'); $('ta').classList.toggle('on', t === 'admin');
+  if (t === 'admin') send({ type: 'admin_list' });
+}
+function renderAdmin() {
+  const a = adm;
+  $('s_on').textContent = a.online; $('s_pl').textContent = a.playing; $('s_pool').textContent = a.pool.toLocaleString();
+  $('ncv').textContent = a.nextCrash ? a.nextCrash.toFixed(2) + 'x' : 'random';
+  $('rb').textContent = a.requests.length; $('rb').classList.toggle('hidden', !a.requests.length);
+  $('reqs').innerHTML = a.requests.length ? a.requests.map(r =>
+    `<div class="r"><span><b>${esc(r.user)}</b> · 💎${r.amount.toLocaleString()}</span><span><button class="sm ok" onclick="resolve('${r.id}',true)">Approve</button> <button class="sm alt" onclick="resolve('${r.id}',false)">No</button></span></div>`
+  ).join('') : '<div class="r"><span style="color:var(--mut)">Koi pending request nahi</span></div>';
+  $('users').innerHTML = a.users.length ? a.users.map(u =>
+    `<div class="r" onclick="$('au').value='${esc(u.name)}'" style="cursor:pointer"><span><span class="dot ${u.online ? 'on' : ''}"></span>${esc(u.name)}${u.inRound ? ' <span class="badge">khel raha</span>' : ''}</span><span class="dia">💎 ${u.diamonds.toLocaleString()}</span></div>`
+  ).join('') : '<div class="r"><span style="color:var(--mut)">Abhi koi player nahi</span></div>';
+}
+function resolve(id, approve) { send({ type: 'admin_resolve', id, approve }); }
+function addD() { send({ type: 'admin_add', user: $('au').value, amount: $('aa').value }); $('aa').value = ''; }
+function setNext() { send({ type: 'admin_next', value: $('nc').value }); }
+function clearNext() { send({ type: 'admin_next', value: 0 }); $('nc').value = ''; }
+
+addEventListener('resize', () => state && draw(state));
+connect();
+</script>
+</body>
+</html>
